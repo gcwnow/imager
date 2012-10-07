@@ -3,6 +3,10 @@
 ROOTFS=../buildroot/output/images/rootfs.squashfs
 mkdir -p apps
 
+# Currently everything runs as root, but that is going to change.
+USER_UID=0
+USER_GID=0
+
 SIZE=$(stat -c %s ${ROOTFS})
 for app in apps/*
 do
@@ -20,13 +24,13 @@ dd if=/dev/zero of=images/data.bin bs=1M count=${IMAGE_SIZE}
 /sbin/mkfs.ext4 -m3 -O ^huge_file -F images/data.bin
 
 echo "Populating data partition..."
-echo "(this step needs superuser privileges for mounting the data partition)"
+echo "(this step needs superuser privileges)"
 mkdir mnt
 sudo mount images/data.bin mnt -o loop
-cp ${ROOTFS} mnt/rootfs.bin
-cp -r apps mnt/
-mkdir -p mnt/local/etc/init.d
-cp resize_data_part.target-sh mnt/local/etc/init.d/S00resize
-chmod a+x mnt/local/etc/init.d/S00resize
+sudo install -m 644 -o 0 -g 0 ${ROOTFS} mnt/rootfs.bin
+sudo install -m 755 -o ${USER_UID} -g ${USER_GID} -d mnt/apps/
+sudo install -m 644 -o ${USER_UID} -g ${USER_GID} -t mnt/apps/ apps/*
+sudo install -m 755 -o 0 -g 0 -d mnt/local/etc/init.d
+sudo install -m 755 -o 0 -g 0 resize_data_part.target-sh mnt/local/etc/init.d/S00resize
 sudo umount mnt
 rmdir mnt
