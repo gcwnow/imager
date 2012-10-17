@@ -1,7 +1,6 @@
 #!/bin/bash
 
 ROOTFS=../buildroot/output/images/rootfs.squashfs
-mkdir -p apps
 
 # Currently everything runs as root, but that is going to change.
 USER_UID=0
