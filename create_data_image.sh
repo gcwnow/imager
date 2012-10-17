@@ -1,6 +1,6 @@
 #!/bin/bash
 
-ROOTFS=../buildroot/output/images/rootfs.squashfs
+ROOTFS=rootfs.squashfs
 
 # Currently everything runs as root, but that is going to change.
 USER_UID=0
@@ -23,12 +23,12 @@ else
 fi
 echo
 
-SIZE=$(stat -c %s ${ROOTFS})
+SIZE=$(stat -Lc %s ${ROOTFS})
 if test -e apps/*
 then
 	for app in apps/*
 	do
-		SIZE=$((${SIZE} + $(stat -c %s ${app})))
+		SIZE=$((${SIZE} + $(stat -Lc %s ${app})))
 	done
 fi
 echo "Total data size: ${SIZE} bytes"
