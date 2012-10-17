@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 
 def writeMBR(out, partitions):
 	partitions = list(partitions)
