@@ -6,22 +6,7 @@ ROOTFS=rootfs.squashfs
 USER_UID=0
 USER_GID=0
 
-echo "Checking how to get superuser privileges..."
-if (( $UID == 0 ))
-then
-	echo "running as root"
-	SU_CMD="sh -c"
-else
-	echo -n "sudo: "
-	if which sudo
-	then
-		SU_CMD="sudo sh -c"
-	else
-		echo 'using "su"'
-		SU_CMD="su -c"
-	fi
-fi
-echo
+source ./su_command.sh
 
 echo "Gathering rootfs and applications..."
 if test -f ${ROOTFS}
