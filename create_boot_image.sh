@@ -1,8 +1,6 @@
 #!/bin/bash
 
-# Partition start sectors.
-KERNEL_START=32
-DATA_START=32768
+source ./partition_layout.sh
 
 echo "Creating boot sector..."
 mkdir -p temp
