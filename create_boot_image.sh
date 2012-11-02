@@ -13,11 +13,9 @@ EOF
 
 echo "Creating boot image..."
 mkdir -p images
-cp temp/bootsector.bin images/boot.bin
-cat uboot-stage1.bin >> images/boot.bin
-cat temp/bootsector.bin >> images/boot.bin
-cat uboot-stage1.bin >> images/boot.bin
-dd if=/dev/zero bs=512 count=1 >> images/boot.bin
-cat uboot-stage2.bin >> images/boot.bin
-SIZE=$(stat -c %s images/boot.bin)
-dd if=/dev/zero bs=512 count=$((${KERNEL_START} - ${SIZE} / 512)) >> images/boot.bin
+dd if=/dev/zero of=images/boot.bin bs=512 count=${KERNEL_START} status=noxfer
+dd seek=0  if=temp/bootsector.bin of=images/boot.bin conv=notrunc bs=512 status=noxfer
+dd seek=16 if=temp/bootsector.bin of=images/boot.bin conv=notrunc bs=512 status=noxfer
+dd seek=1  if=uboot-stage1.bin of=images/boot.bin conv=notrunc bs=512 status=noxfer
+dd seek=17 if=uboot-stage1.bin of=images/boot.bin conv=notrunc bs=512 status=noxfer
+dd seek=33 if=uboot-stage2.bin of=images/boot.bin conv=notrunc bs=512 status=noxfer
