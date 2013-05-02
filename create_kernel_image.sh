@@ -19,7 +19,7 @@ echo "(please ignore the warning about not having enough clusters for FAT32)"
 IMAGE_SIZE=$((${DATA_START} - ${KERNEL_START}))
 mkdir -p images
 dd if=/dev/zero of=images/kernel.bin bs=512 count=${IMAGE_SIZE} status=noxfer
-/sbin/mkdosfs -F 32 images/kernel.bin
+/sbin/mkdosfs -s 8 -F 32 images/kernel.bin
 echo
 
 echo "Populating data partition..."
