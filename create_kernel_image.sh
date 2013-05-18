@@ -16,7 +16,7 @@ fi
 
 echo "Creating kernel partition..."
 echo "(please ignore the warning about not having enough clusters for FAT32)"
-IMAGE_SIZE=$((${DATA_START} - ${KERNEL_START}))
+IMAGE_SIZE=$((${KERNEL_END} - ${KERNEL_START}))
 mkdir -p images
 dd if=/dev/zero of=images/kernel.bin bs=512 count=${IMAGE_SIZE} status=noxfer
 /sbin/mkdosfs -s 8 -F 32 images/kernel.bin

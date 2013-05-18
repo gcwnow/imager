@@ -5,7 +5,7 @@ source ./partition_layout.sh
 echo "Creating boot sector..."
 mkdir -p temp
 ./genmbr.py > temp/bootsector.bin <<EOF
-${KERNEL_START},$((${DATA_START} - ${KERNEL_START})),0b
+${KERNEL_START},$((${KERNEL_END} - ${KERNEL_START})),0b
 ${DATA_START},$((800 * 1024 * 2)),83
 EOF
 
