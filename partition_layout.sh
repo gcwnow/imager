@@ -1,4 +1,4 @@
-# Partition start sectors.
-KERNEL_START=32
-KERNEL_END=32768
+# Partition start/end sectors.
+SYSTEM_START=32
+SYSTEM_END=32768
 DATA_START=819200
