@@ -28,6 +28,7 @@ mkdir mnt
 ${SU_CMD} "
 	mount images/kernel.bin mnt -o loop &&
 	cp vmlinuz.bin mnt/ &&
+	( sha1sum mnt/vmlinuz.bin | cut -d' ' -f1 > mnt/vmlinuz.bin.sha1 ) &&
 	umount mnt
 	"
 rmdir mnt

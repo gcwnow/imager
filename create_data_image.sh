@@ -54,6 +54,7 @@ mkdir mnt
 ${SU_CMD} "
 	mount images/data.bin mnt -o loop &&
 	install -m 644 -o 0 -g 0 ${ROOTFS} mnt/rootfs.bin &&
+	( sha1sum mnt/rootfs.bin | cut -d' ' -f1 > mnt/rootfs.bin.sha1 ) &&
 	install -m 755 -o ${USER_UID} -g ${USER_GID} -d mnt/apps/ &&
 	if [ \"${APPS}\" != \"\" ]
 	then
