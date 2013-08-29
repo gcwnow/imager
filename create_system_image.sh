@@ -10,7 +10,15 @@ then
 	SIZE=$(stat -Lc %s vmlinuz.bin)
 	echo "vmlinuz.bin: $((${SIZE} / 1024)) kB"
 else
-	echo "missing kernel: vmlinuz.bin"
+	echo "missing main kernel: vmlinuz.bin"
+	exit 1
+fi
+if test -f vmlinuz.bak
+then
+	SIZE=$(stat -Lc %s vmlinuz.bak)
+	echo "vmlinuz.bak: $((${SIZE} / 1024)) kB"
+else
+	echo "missing fallback kernel: vmlinuz.bak"
 	exit 1
 fi
 
@@ -29,6 +37,8 @@ ${SU_CMD} "
 	mount images/system.bin mnt -o loop &&
 	cp vmlinuz.bin mnt/ &&
 	( sha1sum mnt/vmlinuz.bin | cut -d' ' -f1 > mnt/vmlinuz.bin.sha1 ) &&
+	cp vmlinuz.bak mnt/ &&
+	( sha1sum mnt/vmlinuz.bak | cut -d' ' -f1 > mnt/vmlinuz.bak.sha1 ) &&
 	umount mnt
 	"
 rmdir mnt
