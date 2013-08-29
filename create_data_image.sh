@@ -37,7 +37,7 @@ echo
 
 # Pick a partition size that is large enough to contain all files but not much
 # larger so the image stays small.
-IMAGE_SIZE=$((8 + ${TOTAL_SIZE} / (960*1024)))
+IMAGE_SIZE=$((8 + ${TOTAL_SIZE} / (920*1024)))
 
 echo "Creating data partition of ${IMAGE_SIZE} MB..."
 mkdir -p images
