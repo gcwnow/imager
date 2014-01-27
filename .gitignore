@@ -1,5 +1,6 @@
 rootfs.squashfs
 ubiboot.bin
 vmlinuz.bin
+vmlinuz.bak
 images/
 temp/
