@@ -1,23 +1,14 @@
 #!/bin/bash
 
-ROOTFS=rootfs.squashfs
-
 # Currently everything runs as root, but that is going to change.
 USER_UID=0
 USER_GID=0
 
 source ./su_command.sh
 
-echo "Gathering rootfs and applications..."
-if test -f ${ROOTFS}
-then
-	SIZE=$(stat -Lc %s ${ROOTFS})
-	echo "rootfs: ${ROOTFS} - $((${SIZE} / 1024)) kB"
-	TOTAL_SIZE=${SIZE}
-else
-	echo "missing rootfs: ${ROOTFS}"
-	exit 1
-fi
+TOTAL_SIZE=0
+
+echo "Gathering applications..."
 APPS=
 for app in apps/*
 do
@@ -53,8 +44,6 @@ echo "(this step needs superuser privileges)"
 mkdir mnt
 ${SU_CMD} "
 	mount images/data.bin mnt -o loop &&
-	install -m 644 -o 0 -g 0 ${ROOTFS} mnt/rootfs.bin &&
-	( sha1sum mnt/rootfs.bin | cut -d' ' -f1 > mnt/rootfs.bin.sha1 ) &&
 	install -m 755 -o ${USER_UID} -g ${USER_GID} -d mnt/apps/ &&
 	if [ \"${APPS}\" != \"\" ]
 	then
