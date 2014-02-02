@@ -75,3 +75,5 @@ ${SU_CMD} "
 	umount mnt
 	"
 rmdir mnt
+
+./trimfat.py images/system.bin
