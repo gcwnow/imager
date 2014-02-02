@@ -44,7 +44,7 @@ fi
 if test -f modules.squashfs.bak
 then
 	SIZE=$(stat -Lc %s modules.squashfs.bak)
-	echo "modules.squashfs: $((${SIZE} / 1024)) kB"
+	echo "modules.squashfs.bak: $((${SIZE} / 1024)) kB"
 else
 	echo "missing fallback modules filesystem: modules.squashfs.bak"
 	exit 1
