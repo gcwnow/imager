@@ -51,7 +51,7 @@ else
 fi
 
 echo "Creating system partition..."
-IMAGE_SIZE=$((${SYSTEM_END} - ${SYSTEM_START}))
+IMAGE_SIZE=$((${DATA_START} - ${SYSTEM_START}))
 mkdir -p images
 dd if=/dev/zero of=images/system.bin bs=512 count=${IMAGE_SIZE} status=noxfer
 /sbin/mkdosfs -s 8 -F 32 images/system.bin

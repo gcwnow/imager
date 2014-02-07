@@ -1,4 +1,3 @@
 # Partition start/end sectors.
 SYSTEM_START=32
-SYSTEM_END=819199
 DATA_START=819200
