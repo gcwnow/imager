@@ -8,6 +8,8 @@ START=`partx /dev/${DEVICE} -n ${PART_NUM} -g -o start`
 SIZE=$((${DEVICE_SIZE} - ${START}))
 
 echo "${START},${SIZE}" | sfdisk --no-reread -uS -N ${PART_NUM} /dev/${DEVICE}
+
+set +e
 resizepart /dev/${DEVICE} ${PART_NUM} ${SIZE}
 resize2fs /dev/${DEVICE}p${PART_NUM}
 
