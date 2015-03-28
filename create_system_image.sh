@@ -22,6 +22,16 @@ else
 	exit 1
 fi
 
+echo "Checking presence of mininit-syspart..."
+if test -f mininit-syspart
+then
+	SIZE=$(stat -Lc %s mininit-syspart)
+	echo "mininit-syspart: $((${SIZE} / 1024)) kB"
+else
+	echo "missing program: mininit-syspart"
+	exit 1
+fi
+
 echo "Checking presence of root filesystem..."
 if test -f rootfs.squashfs
 then
@@ -62,10 +72,14 @@ echo "(this step needs superuser privileges)"
 mkdir mnt
 ${SU_CMD} "
 	mount images/system.bin mnt -o loop &&
+	mkdir -p mnt/dev mnt/root &&
 	cp vmlinuz.bin mnt/ &&
 	( sha1sum mnt/vmlinuz.bin | cut -d' ' -f1 > mnt/vmlinuz.bin.sha1 ) &&
 	cp vmlinuz.bak mnt/ &&
 	( sha1sum mnt/vmlinuz.bak | cut -d' ' -f1 > mnt/vmlinuz.bak.sha1 ) &&
+	cp mininit-syspart mnt/ &&
+	( sha1sum mnt/mininit-syspart | cut -d' ' -f1 > mnt/mininit-syspart.sha1 ) &&
+	chmod +x mnt/mininit-syspart &&
 	cp rootfs.squashfs mnt/ &&
 	( sha1sum mnt/rootfs.squashfs | cut -d' ' -f1 > mnt/rootfs.squashfs.sha1 ) &&
 	cp modules.squashfs mnt/ &&

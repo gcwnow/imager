@@ -4,5 +4,6 @@ vmlinuz.bin
 vmlinuz.bak
 modules.squashfs
 modules.squashfs.bak
+mininit-syspart
 images/
 temp/
