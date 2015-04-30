@@ -2,7 +2,11 @@
 
 source ./partition_layout.sh
 
-source ./su_command.sh
+if ! which mcopy > /dev/null
+then
+	echo "Please install the 'mtools' package."
+	exit 1
+fi
 
 echo "Checking presence of kernel files..."
 if test -f vmlinuz.bin
@@ -67,27 +71,20 @@ dd if=/dev/zero of=images/system.bin bs=512 count=${IMAGE_SIZE} status=noxfer
 /sbin/mkdosfs -s 8 -F 32 images/system.bin
 echo
 
-echo "Populating data partition..."
-echo "(this step needs superuser privileges)"
-mkdir mnt
-${SU_CMD} "
-	mount images/system.bin mnt -o loop &&
-	mkdir -p mnt/dev mnt/root &&
-	cp vmlinuz.bin mnt/ &&
-	( sha1sum mnt/vmlinuz.bin | cut -d' ' -f1 > mnt/vmlinuz.bin.sha1 ) &&
-	cp vmlinuz.bak mnt/ &&
-	( sha1sum mnt/vmlinuz.bak | cut -d' ' -f1 > mnt/vmlinuz.bak.sha1 ) &&
-	cp mininit-syspart mnt/ &&
-	( sha1sum mnt/mininit-syspart | cut -d' ' -f1 > mnt/mininit-syspart.sha1 ) &&
-	chmod +x mnt/mininit-syspart &&
-	cp rootfs.squashfs mnt/ &&
-	( sha1sum mnt/rootfs.squashfs | cut -d' ' -f1 > mnt/rootfs.squashfs.sha1 ) &&
-	cp modules.squashfs mnt/ &&
-	( sha1sum mnt/modules.squashfs | cut -d' ' -f1 > mnt/modules.squashfs.sha1 ) &&
-	cp modules.squashfs.bak mnt/ &&
-	( sha1sum mnt/modules.squashfs.bak | cut -d' ' -f1 > mnt/modules.squashfs.bak.sha1 ) &&
-	umount mnt
-	"
-rmdir mnt
+echo "Populating system partition..."
+mmd -i images/system.bin ::dev ::root
+mcopy -i images/system.bin vmlinuz.bin ::vmlinuz.bin
+sha1sum vmlinuz.bin | cut -d' ' -f1 | mcopy -i images/system.bin - ::vmlinuz.bin.sha1
+mcopy -i images/system.bin vmlinuz.bak ::vmlinuz.bak
+sha1sum vmlinuz.bak | cut -d' ' -f1 | mcopy -i images/system.bin - ::vmlinuz.bak.sha1
+mcopy -i images/system.bin mininit-syspart ::mininit-syspart
+sha1sum mininit-syspart | cut -d' ' -f1 | mcopy -i images/system.bin - ::mininit-syspart.sha1
+mcopy -i images/system.bin modules.squashfs ::modules.squashfs
+sha1sum modules.squashfs | cut -d' ' -f1 | mcopy -i images/system.bin - ::modules.squashfs.sha1
+mcopy -i images/system.bin modules.squashfs.bak ::modules.squashfs.bak
+sha1sum modules.squashfs.bak | cut -d' ' -f1 | mcopy -i images/system.bin - ::modules.squashfs.bak.sha1
+mcopy -i images/system.bin rootfs.squashfs ::rootfs.squashfs
+sha1sum rootfs.squashfs | cut -d' ' -f1 | mcopy -i images/system.bin - ::rootfs.squashfs.sha1
 
+echo "Minimizing image size..."
 ./trimfat.py images/system.bin
