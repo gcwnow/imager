@@ -1,12 +1,11 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import os
+import struct
 import sys
 
-assert sys.version_info.major >= 3, 'requires Python 3'
-
 def writeU32LE(out, value):
-	out.write(bytes([(value >> shift) & 0xFF for shift in range(0, 32, 8)]))
+	out.write(struct.pack('<I', value))
 
 def writeMBR(out, partitions):
 	partitions = list(partitions)
