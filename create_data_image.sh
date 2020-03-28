@@ -47,7 +47,8 @@ ${SU_CMD} "
 		install -m 644 -o ${USER_UID} -g ${USER_GID} -t mnt/apps/ ${APPS}
 	fi &&
 	install -m 755 -o 0 -g 0 -d mnt/local/etc/init.d &&
-	install -m 755 -o 0 -g 0 resize_data_part.target-sh mnt/local/etc/init.d/S00resize &&
+	install -m 755 -o 0 -g 0 resize_data_part_launcher.target-sh mnt/local/etc/init.d/S00resize &&
+	install -m 755 -o 0 -g 0 resize_data_part.target-sh mnt/resize_data_part.sh &&
 	umount mnt
 	"
 rmdir mnt

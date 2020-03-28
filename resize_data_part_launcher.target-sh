@@ -1,0 +1,10 @@
+#!/bin/sh
+
+set -e
+
+# Copy the resize script to tmpfs and run it.
+# We have to do this so that we can unmount the partition.
+echo 'Launching data partition resizer...'
+cp /media/data/resize_data_part.sh /tmp/resize_data_part.sh
+chmod +x /tmp/resize_data_part.sh
+exec /tmp/resize_data_part.sh

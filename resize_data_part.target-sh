@@ -1,5 +1,7 @@
 #!/bin/sh
 
+set -e
+
 DEVICE=mmcblk0
 PART_NUM=2
 
@@ -7,14 +9,39 @@ DEVICE_SIZE=`cat /sys/block/${DEVICE}/size`
 START=`partx /dev/${DEVICE} -n ${PART_NUM} -g -o start`
 SIZE=$((${DEVICE_SIZE} - ${START}))
 
-echo "${START},${SIZE}" | sfdisk --no-reread -uS -N ${PART_NUM} /dev/${DEVICE}
+mount_data_partition() {
+	echo "Mounting the partition..."
+	/bin/mount -o remount,rw /media
+	/bin/mount "/dev/${DEVICE}p${PART_NUM}" /media/data
+	/bin/mount -o remount,ro /media
+}
 
 clear
 echo 1 > /sys/devices/virtual/vtconsole/vtcon1/bind
 echo "Resizing the data partition. Please be patient."
 
-set +e
+# Unmount data partition before resizing for faster resizing.
+echo "Unmounting the partition..."
+/bin/mount -o remount,rw /media
+/bin/umount /media/data
+/bin/mount -o remount,ro /media
+# Try to remount the data partition on error (early EXIT is an error).
+trap mount_data_partition EXIT
+
+echo "Updating partition table..."
+
+# If the --no-reread option is not supported, this command will fail (|| true takes care of that)
+echo "${START},${SIZE}" | sfdisk --no-reread -uS -N ${PART_NUM} /dev/${DEVICE} || true
+
+clear # Previous command has very noisy output
+echo "Resizing the data partition. Please be patient."
 resizepart /dev/${DEVICE} ${PART_NUM} ${SIZE}
 resize2fs /dev/${DEVICE}p${PART_NUM}
 
-rm $0
+# Clear the trap that attempts to mount the partition.
+trap - EXIT
+mount_data_partition
+
+rm /media/data/local/etc/init.d/S00resize
+rm /media/data/resize_data_part.sh
+rm "$0"
