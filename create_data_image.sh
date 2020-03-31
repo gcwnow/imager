@@ -33,10 +33,7 @@ IMAGE_SIZE=$((8 + ${TOTAL_SIZE} / (920*1024)))
 echo "Creating data partition of ${IMAGE_SIZE} MB..."
 mkdir -p images
 dd if=/dev/zero of=images/data.bin bs=1M count=${IMAGE_SIZE}
-/sbin/mkfs.ext4 -b4096 -I128 -m3 \
-		-E lazy_itable_init=0,lazy_journal_init=0,resize=268435456 \
-		-O large_file,^huge_file,^uninit_bg,^ext_attr \
-		-F images/data.bin
+MKE2FS_CONFIG=mke2fs.conf /sbin/mke2fs -t od-data -F images/data.bin
 echo
 
 echo "Populating data partition..."
