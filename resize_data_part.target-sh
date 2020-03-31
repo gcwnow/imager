@@ -18,7 +18,8 @@ mount_data_partition() {
 
 clear
 echo 1 > /sys/devices/virtual/vtconsole/vtcon1/bind
-echo "Resizing the data partition. Please be patient."
+echo "Resizing the data partition."
+echo "This will take a few minutes"
 
 # Unmount data partition before resizing for faster resizing.
 echo "Unmounting the partition..."
@@ -27,15 +28,23 @@ echo "Unmounting the partition..."
 /bin/mount -o remount,ro /media
 # Try to remount the data partition on error (early EXIT is an error).
 trap mount_data_partition EXIT
+echo
 
 echo "Updating partition table..."
-
-# If the --no-reread option is not supported, this command will fail (|| true takes care of that)
-echo "${START},${SIZE}" | sfdisk --no-reread -uS -N ${PART_NUM} /dev/${DEVICE} || true
-
-clear # Previous command has very noisy output
-echo "Resizing the data partition. Please be patient."
+SFDISK_OPTS="--no-reread --quiet -uS -N ${PART_NUM}"
+# Older versions of sfdisk do not support --no-tell-kernel.
+HAS_NO_TELL_KERNEL=n
+if sfdisk --help | grep -- --no-tell-kernel > /dev/null; then
+	HAS_NO_TELL_KERNEL=y
+	SFDISK_OPTS="${SFDISK_OPTS} --no-tell-kernel"
+fi
+echo "${START},${SIZE}" | sfdisk ${SFDISK_OPTS} /dev/${DEVICE}
+if [ "$HAS_NO_TELL_KERNEL" = n ]; then
+	echo "Re-reading error above is expected."
+fi
 resizepart /dev/${DEVICE} ${PART_NUM} ${SIZE}
+echo
+
 resize2fs /dev/${DEVICE}p${PART_NUM}
 
 # Clear the trap that attempts to mount the partition.
