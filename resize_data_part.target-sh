@@ -1,5 +1,21 @@
 #!/bin/sh
 
+set -e
+
+if [[ $0 != /tmp/resize_data_part.sh ]]; then
+	# Copy the resize script to tmpfs and run it.
+	# We have to do this so that we can unmount the partition.
+	cp "$0" /tmp/resize_data_part.sh
+	# We call `exit` on the same line so that the shell does not
+	# attempt to read the script once it's been removed.
+	# This works because the shell reads the script line-by-line.
+	. /tmp/resize_data_part.sh; exit
+fi
+
+# Remove the resize script.
+# If the resizing fails, we do not want to try it again on the next reboot.
+rm /media/data/local/etc/init.d/S00resize
+
 DEVICE=mmcblk0
 PART_NUM=2
 
@@ -7,14 +23,34 @@ DEVICE_SIZE=`cat /sys/block/${DEVICE}/size`
 START=`partx /dev/${DEVICE} -n ${PART_NUM} -g -o start`
 SIZE=$((${DEVICE_SIZE} - ${START}))
 
-echo "${START},${SIZE}" | sfdisk --no-reread -uS -N ${PART_NUM} /dev/${DEVICE}
+mount_data_partition() {
+	echo "Mounting the partition..."
+	/etc/init.d/S03mountdata.sh start
+}
 
 clear
 echo 1 > /sys/devices/virtual/vtconsole/vtcon1/bind
-echo "Resizing the data partition. Please be patient."
+echo "Resizing the data partition."
+echo "This will take a few minutes"
 
-set +e
+# Unmount data partition before resizing for faster resizing.
+echo "Unmounting the partition..."
+/bin/mount -o remount,rw /media
+/bin/umount /media/data
+/bin/mount -o remount,ro /media
+# Try to remount the data partition on error (early EXIT is an error).
+trap mount_data_partition EXIT
+echo
+
+echo "Updating partition table..."
+echo "${START},${SIZE}" | sfdisk --no-tell-kernel --no-reread --quiet -uS -N ${PART_NUM} /dev/${DEVICE}
 resizepart /dev/${DEVICE} ${PART_NUM} ${SIZE}
+echo
+
 resize2fs /dev/${DEVICE}p${PART_NUM}
 
-rm $0
+# Clear the trap that attempts to mount the partition.
+trap - EXIT
+mount_data_partition
+
+rm "$0"
